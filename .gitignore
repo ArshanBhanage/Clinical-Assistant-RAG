@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend specific - Data and Indexes (LARGE FILES)
+backend/indexes/*.faiss
+backend/indexes/*.pkl
+backend/data/Clinical/*.pdf
+backend/data/Clinical/**/*.pdf
+backend/data/Clinical/*.csv
+backend/data/*/pdfs/*.pdf
+backend/ingestion_output.log
+backend/ingestion.log
+
+# Keep folder structure
+!backend/indexes/.gitkeep
+!backend/data/Clinical/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.turbo/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary files
+*.tmp
+*.bak
+.cache/

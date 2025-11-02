@@ -1,0 +1,316 @@
+'use client'
+
+import { useState } from 'react'
+import axios from 'axios'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+interface Source {
+  source: string
+  page: number
+  chunk_type: string
+  similarity: number
+}
+
+interface QueryResponse {
+  response: string
+  sources: Source[]
+  confidence: string
+  retrieved_docs: any[]
+}
+
+export default function Home() {
+  const [query, setQuery] = useState('')
+  const [domain, setDomain] = useState('')
+  const [response, setResponse] = useState<QueryResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [graphImage, setGraphImage] = useState('')
+  const [graphType, setGraphType] = useState('wordcloud')
+  const [loadingGraph, setLoadingGraph] = useState(false)
+
+  const domains = [
+    { id: '', name: 'All Domains' },
+    { id: 'covid', name: 'COVID Clinical Research' },
+    { id: 'diabetes', name: 'Diabetes' },
+    { id: 'heart_attack', name: 'Heart Attack' },
+    { id: 'knee_injuries', name: 'Knee Injuries' },
+  ]
+
+  const graphTypes = [
+    { id: 'wordcloud', name: 'Word Cloud' },
+    { id: 'term_frequency', name: 'Term Frequency' },
+    { id: 'sources', name: 'Source Distribution' },
+    { id: 'similarity', name: 'Similarity Scores' },
+  ]
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!query.trim()) {
+      setError('Please enter a question')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setResponse(null)
+    setGraphImage('')
+
+    try {
+      const result = await axios.post(`${API_URL}/query`, {
+        query: query.trim(),
+        domain: domain || null,
+      })
+
+      setResponse(result.data)
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'An error occurred. Please make sure the backend is running.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleFeedback = async (rating: 'up' | 'down') => {
+    if (!response) return
+
+    try {
+      await axios.post(`${API_URL}/feedback`, {
+        query,
+        response: response.response,
+        rating,
+      })
+      
+      alert(`Thank you for your feedback! (${rating === 'up' ? '👍' : '👎'})`)
+    } catch (err) {
+      console.error('Error submitting feedback:', err)
+    }
+  }
+
+  const handleGenerateGraph = async () => {
+    if (!query.trim()) {
+      setError('Please submit a query first')
+      return
+    }
+
+    setLoadingGraph(true)
+    setGraphImage('')
+
+    try {
+      const result = await axios.post(`${API_URL}/generate-graph`, {
+        query: query.trim(),
+        domain: domain || null,
+        viz_type: graphType,
+      })
+
+      setGraphImage(result.data.image)
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Error generating graph')
+    } finally {
+      setLoadingGraph(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+            🏥 Clinical AI Assistant
+          </h1>
+          <p className="text-lg text-gray-600">
+            Ask questions about COVID-19, Diabetes, Heart Attack, or Knee Injuries
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Powered by Landing AI • RAG Pipeline • Local Datasets Only
+          </p>
+        </div>
+
+        {/* Query Form */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Domain Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Clinical Domain
+              </label>
+              <select
+                value={domain}
+                onChange={(e) => setDomain(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              >
+                {domains.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Query Input */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Your Question
+              </label>
+              <textarea
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="e.g., What are the symptoms of COVID-19? How is diabetes managed?"
+                rows={4}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                '🔍 Submit Query'
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6">
+            <p className="text-red-800 font-medium">⚠️ {error}</p>
+          </div>
+        )}
+
+        {/* Response Display */}
+        {response && (
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Response</h2>
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                response.confidence === 'high' ? 'bg-green-100 text-green-800' :
+                response.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {response.confidence.toUpperCase()} CONFIDENCE
+              </span>
+            </div>
+
+            <div className="prose max-w-none mb-6">
+              <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">
+                {response.response}
+              </p>
+            </div>
+
+            {/* Feedback Buttons */}
+            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
+              <span className="text-sm font-medium text-gray-600">Was this helpful?</span>
+              <button
+                onClick={() => handleFeedback('up')}
+                className="flex items-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-all transform hover:scale-105"
+              >
+                <span className="text-xl">👍</span>
+                <span className="font-medium">Yes</span>
+              </button>
+              <button
+                onClick={() => handleFeedback('down')}
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-all transform hover:scale-105"
+              >
+                <span className="text-xl">👎</span>
+                <span className="font-medium">No</span>
+              </button>
+            </div>
+
+            {/* Sources */}
+            {response.sources.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  📚 Sources ({response.sources.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {response.sources.map((source, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-semibold text-blue-900 text-sm">
+                            {source.source}
+                          </p>
+                          <p className="text-xs text-blue-700 mt-1">
+                            Page {source.page} • {source.chunk_type}
+                          </p>
+                        </div>
+                        <div className="ml-2 bg-blue-200 text-blue-900 text-xs font-bold px-2 py-1 rounded">
+                          {(source.similarity * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Graph Generation */}
+        {response && (
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">📊 Visualizations</h2>
+            
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <select
+                value={graphType}
+                onChange={(e) => setGraphType(e.target.value)}
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                {graphTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={handleGenerateGraph}
+                disabled={loadingGraph}
+                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+              >
+                {loadingGraph ? '⏳ Generating...' : '📈 Generate Graph'}
+              </button>
+            </div>
+
+            {graphImage && (
+              <div className="border-2 border-gray-200 rounded-xl overflow-hidden">
+                <img
+                  src={graphImage}
+                  alt="Generated visualization"
+                  className="w-full h-auto"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="text-center mt-8 text-sm text-gray-500">
+          <p>
+            This system uses ONLY local datasets. No internet data is accessed.
+          </p>
+          <p className="mt-1">
+            Built with Landing AI • FAISS • OpenRouter • Next.js
+          </p>
+        </div>
+      </div>
+    </main>
+  )
+}

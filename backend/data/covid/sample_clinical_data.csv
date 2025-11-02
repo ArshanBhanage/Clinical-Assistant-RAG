@@ -1,0 +1,6 @@
+patient_id,age,gender,diagnosis,symptoms,treatment,outcome,admission_date,discharge_date
+P001,45,M,COVID-19,fever;cough;fatigue,oxygen therapy;antiviral,recovered,2020-03-15,2020-03-25
+P002,62,F,COVID-19,shortness of breath;fever,ventilation;steroids,recovered,2020-04-01,2020-04-20
+P003,38,M,COVID-19,loss of taste;fever;headache,supportive care,recovered,2020-05-10,2020-05-18
+P004,71,M,COVID-19,severe pneumonia;fever,ICU care;ventilation,deceased,2020-03-20,2020-04-05
+P005,29,F,COVID-19,mild fever;cough,home isolation,recovered,2020-06-01,2020-06-10

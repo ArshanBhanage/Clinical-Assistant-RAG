@@ -1,0 +1,6 @@
+patient_id,age,gender,condition,symptoms,blood_glucose,cholesterol,treatment,outcome
+P101,58,M,Type 2 Diabetes,fatigue;frequent urination,180,220,metformin;insulin,controlled
+P102,65,F,Heart Attack,chest pain;shortness of breath,110,280,angioplasty;statin,recovered
+P103,52,M,Type 1 Diabetes,excessive thirst;weight loss,220,180,insulin therapy,controlled
+P104,70,M,Heart Attack,severe chest pain;sweating,95,300,bypass surgery,recovered
+P105,48,F,Type 2 Diabetes,blurred vision;tingling,195,240,lifestyle modification,improved

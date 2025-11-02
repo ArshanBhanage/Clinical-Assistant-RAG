@@ -1,0 +1,6 @@
+patient_id,age,gender,injury_type,cause,symptoms,treatment,recovery_time,activity_level
+P201,25,M,ACL Tear,soccer injury,knee instability;swelling,surgical reconstruction,6-9 months,athletic
+P202,32,F,Meniscus Tear,running,knee pain;locking,arthroscopic surgery,3-6 months,moderate
+P203,28,M,Patellar Tendonitis,basketball,anterior knee pain,physical therapy,2-3 months,athletic
+P204,45,F,Osteoarthritis,aging,chronic pain;stiffness,pain management,ongoing,sedentary
+P205,22,M,MCL Sprain,skiing accident,medial knee pain,conservative treatment,4-6 weeks,athletic
