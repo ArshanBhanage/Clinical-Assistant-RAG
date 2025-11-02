@@ -71,10 +71,10 @@ if [ -f "backend/.env" ]; then
     echo -e "${GREEN}✓${NC} Found"
     
     # Check for API keys
-    if grep -q "VISION_AGENT_API_KEY=ajBsZzJjdzE2ajhnY3VrdndoZGdiOmV6TFNYUDMyZU9YWEFhZ3VPWVVhN2JSeFpSdWQ0QU16" backend/.env; then
+    if grep -q "VISION_AGENT_API_KEY=" backend/.env && ! grep -q "VISION_AGENT_API_KEY=your_key_here" backend/.env; then
         echo "  Landing AI API key: ${GREEN}✓${NC} Configured"
     else
-        echo "  Landing AI API key: ${RED}✗${NC} Missing or incorrect"
+        echo "  Landing AI API key: ${RED}✗${NC} Missing or not configured"
         ERRORS=$((ERRORS + 1))
     fi
     
