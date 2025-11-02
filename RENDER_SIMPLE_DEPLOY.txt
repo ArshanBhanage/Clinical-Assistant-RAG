@@ -1,0 +1,286 @@
+🚀 RENDER DEPLOYMENT - FRESH INGESTION APPROACH
+===============================================
+
+Strategy: Deploy empty backend, then run data ingestion on Render with
+your new Landing AI API key. Indexes will be stored on persistent disk.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 DEPLOYMENT STEPS (30 minutes total)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PART 1: Deploy Backend (10 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 1. Go to: https://render.com
+☐ 2. Sign in with GitHub
+☐ 3. Click "New +" → "Web Service"
+☐ 4. Select repository: Clinical-Assistant-RAG
+☐ 5. Click "Connect"
+
+☐ 6. Configure Backend Service:
+     Name: clinical-ai-backend
+     Region: Oregon (US West)
+     Branch: main
+     Root Directory: backend
+     Runtime: Python 3
+     
+☐ 7. Build & Start Commands:
+     Build Command: pip install -r requirements.txt
+     Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
+     
+☐ 8. Instance Type:
+     Free ✅
+     
+☐ 9. Add Environment Variables (Click "Add Environment Variable" for each):
+     
+     Variable 1:
+     Key: OPENROUTER_API_KEY
+     Value: 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
+     
+     Variable 2:
+     Key: VISION_AGENT_API_KEY
+     Value: [YOUR NEW LANDING AI KEY - generate this first!]
+     
+     Variable 3:
+     Key: INDEX_DIR
+     Value: /var/data/indexes
+     
+     Variable 4:
+     Key: DATA_DIR
+     Value: /var/data/Clinical
+     
+☐ 10. Add Persistent Disk:
+      Scroll to "Disks" section
+      Click "Add Disk"
+      
+      Name: clinical-data
+      Mount Path: /var/data
+      Size: 3 GB (need space for PDFs + indexes)
+      
+☐ 11. Click "Create Web Service"
+
+☐ 12. Wait for initial deployment (3-5 min)
+      - Backend will start (indexes not loaded yet - that's OK!)
+      
+☐ 13. Get Backend URL:
+      Copy: https://clinical-ai-backend.onrender.com
+      ⚠️ SAVE THIS!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PART 2: Upload Data & Run Ingestion (15 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 14. Access Shell (Paid Feature):
+      If you have Shell access:
+      - Click "Shell" tab
+      - Skip to Step 16
+      
+      If NO Shell access (free tier):
+      - Use SSH (Render provides SSH keys)
+      - Or upgrade to Starter plan ($7/month) for Shell
+      
+☐ 15. Generate New Landing AI API Key:
+      Go to: https://landing.ai
+      - Create new API key
+      - Copy it
+      - Update in Render: Settings → Environment → VISION_AGENT_API_KEY
+      
+☐ 16. In Shell/SSH, upload your Clinical data folder:
+      
+      # Create directories
+      mkdir -p /var/data/Clinical
+      mkdir -p /var/data/indexes
+      
+      # Upload your Clinical folder (from local):
+      # You'll need to upload these via SCP or Shell file upload:
+      # - Clinical/Covid/*.pdf + ctg-studies_covid.csv
+      # - Clinical/Diabetes/*.pdf + ctg-studies_diabetes.csv
+      # - Clinical/Heart_attack/*.pdf + ctg-studies_Hearattack.csv
+      # - Clinical/KneeInjuries/*.pdf + ctg-studies_KneeInjuries.csv
+      
+☐ 17. Run Data Ingestion:
+      
+      cd /opt/render/project/src
+      python data_ingestion.py
+      
+      This will:
+      - Process all PDFs with Landing AI
+      - Create FAISS indexes
+      - Save to /var/data/indexes/
+      - Take ~15-20 minutes
+      
+☐ 18. Verify Ingestion Complete:
+      
+      ls -lh /var/data/indexes/
+      
+      Should see 9 files:
+      - covid_index.faiss
+      - covid_metadata.pkl
+      - diabetes_index.faiss
+      - diabetes_metadata.pkl
+      - heart_attack_index.faiss
+      - heart_attack_metadata.pkl
+      - knee_injuries_index.faiss
+      - knee_injuries_metadata.pkl
+      - all_documents.pkl
+      
+☐ 19. Restart Service:
+      Go back to dashboard
+      Click "Manual Deploy" → "Deploy latest commit"
+      
+☐ 20. Test Backend:
+      Visit: https://your-backend.onrender.com/health
+      
+      Should show all indexes loaded with document counts!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PART 3: Deploy Frontend (5 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 21. Click "New +" → "Web Service"
+☐ 22. Select repository: Clinical-Assistant-RAG
+☐ 23. Configure Frontend:
+      
+      Name: clinical-ai-frontend
+      Region: Same as backend
+      Branch: main
+      Root Directory: frontend
+      Runtime: Node
+      
+☐ 24. Build & Start:
+      Build Command: npm install && npm run build
+      Start Command: npm start
+      
+☐ 25. Instance Type: Free ✅
+
+☐ 26. Add Environment Variable:
+      Key: NEXT_PUBLIC_API_URL
+      Value: https://clinical-ai-backend.onrender.com
+      (Your backend URL from Step 13)
+      
+☐ 27. Click "Create Web Service"
+☐ 28. Wait for deployment (3-5 min)
+☐ 29. Get frontend URL - THIS IS YOUR APP! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PART 4: Test (2 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 30. Visit your frontend URL
+☐ 31. Select "Heart Attack"
+☐ 32. Ask: "What are the symptoms?"
+☐ 33. Verify response! ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔑 CREDENTIALS NEEDED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. OpenRouter API Key (you have):
+   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
+
+2. Landing AI API Key (generate new):
+   Go to: https://landing.ai → API Keys → Create New
+   You'll get: something like "ajBsZz...xyz"
+
+3. GitHub Repository:
+   https://github.com/ArshanBhanage/Clinical-Assistant-RAG
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 DATA TO UPLOAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From your local machine:
+/Users/spartan/Documents/Data Mining/Advanced Data Mining/clinical-ai-assistant/backend/data/Clinical/
+
+Upload this entire Clinical folder to Render at: /var/data/Clinical/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 COST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WITHOUT Shell Access (Free):
+  • Backend: Free
+  • Frontend: Free  
+  • 3GB Disk: Free (included)
+  • Total: $0/month ✅
+  • BUT: Need to upload data via SCP/SSH
+  
+WITH Shell Access (Recommended):
+  • Backend: $7/month (Starter plan)
+  • Frontend: Free
+  • 3GB Disk: Included
+  • Total: $7/month
+  • Benefit: Easy file upload & ingestion
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ ALTERNATIVE: Deploy WITHOUT Shell
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If you want to stay 100% free without Shell access:
+
+Option A: Use Local Docker + Upload Just Indexes
+  1. Run ingestion locally (as you did before)
+  2. Upload just the indexes folder via SCP
+  3. Skip data upload, skip ingestion on Render
+
+Option B: Commit Indexes to GitHub
+  1. Run ingestion locally
+  2. Create separate branch with indexes
+  3. Deploy from that branch
+  4. (GitHub has 100MB file limit, so may need Git LFS)
+
+Option C: Use Different Platform
+  1. Try Railway.app (may have better free tier)
+  2. Or use Docker + DigitalOcean ($5/month)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 RECOMMENDED APPROACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For easiest deployment:
+
+1. Get new Landing AI API key (5 min)
+2. Run ingestion locally (20 min) ← YOU ALREADY DID THIS!
+3. Upload pre-built indexes via SCP (10 min)
+4. Deploy backend + frontend (10 min)
+
+Total: 45 min, $0 cost ✅
+
+This uses your existing indexes (no re-ingestion needed)!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 QUICK DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Choose your path:
+
+Path A: Re-ingest on Render (Fresh Start)
+  ✅ Clean deployment
+  ❌ Need Landing AI credits
+  ❌ Need Shell access ($7/month) OR SCP setup
+  ⏱️  Time: 30-45 min
+
+Path B: Upload Pre-Built Indexes (Recommended!)
+  ✅ No new Landing AI credits needed
+  ✅ Uses your existing indexes
+  ✅ Can stay on free tier with SCP
+  ⏱️  Time: 15-20 min
+  
+Which do you prefer?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 START HERE: https://render.com
+
+Need help choosing or getting started? Let me know! 🎯

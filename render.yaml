@@ -4,22 +4,28 @@ services:
     name: clinical-ai-backend
     env: python
     region: oregon
-    plan: free
+    plan: starter  # Need paid plan for persistent disk and longer build time
     branch: main
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: ./start-render.sh
+    startCommand: ./deploy-render.sh
     envVars:
       - key: OPENROUTER_API_KEY
+        sync: false
+      - key: VISION_AGENT_API_KEY
         sync: false
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: PORT
         value: 8000
+      - key: INDEX_DIR
+        value: /var/data/indexes
+      - key: DATA_DIR
+        value: /var/data/Clinical
     disk:
-      name: indexes-storage
-      mountPath: /app/indexes
-      sizeGB: 1
+      name: clinical-data
+      mountPath: /var/data
+      sizeGB: 3  # Need space for PDFs + indexes
     healthCheckPath: /health
     autoDeploy: true
 

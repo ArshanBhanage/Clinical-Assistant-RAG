@@ -1,0 +1,364 @@
+═══════════════════════════════════════════════════════════════
+🚀 RENDER DEPLOYMENT WITH AUTO-INGESTION
+═══════════════════════════════════════════════════════════════
+
+This guide deploys your app to Render with automatic data ingestion
+using Landing AI. Indexes are created fresh on deployment.
+
+COST: $7/month (Starter plan for disk + build time)
+TIME: 45 minutes (mostly automatic)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Deploy Backend to Render (10 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 1. Go to: https://render.com
+☐ 2. Sign in with GitHub
+☐ 3. Click "New +" → "Web Service"
+☐ 4. Select repository: Clinical-Assistant-RAG
+☐ 5. Click "Connect"
+
+☐ 6. Configure Backend:
+     Name: clinical-ai-backend
+     Region: Oregon (US West)
+     Branch: main
+     Root Directory: backend
+     
+☐ 7. Runtime Settings:
+     Environment: Python 3
+     Build Command: pip install -r requirements.txt
+     Start Command: ./deploy-render.sh
+     
+☐ 8. Instance Type:
+     ⚠️ SELECT: Starter ($7/month) ← REQUIRED for disk & build time
+     
+☐ 9. Add Environment Variables (one by one):
+     
+     Variable 1:
+     Key: OPENROUTER_API_KEY
+     Value: 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
+     
+     Variable 2:
+     Key: VISION_AGENT_API_KEY
+     Value: ZDc1MmZ4d2k3dmZkNXk3NzYxOTEyOng2WXJQVlMzT3cyRGh3WnpRbTF1ekV0MWR3eEE3RXc3
+     
+     Variable 3:
+     Key: INDEX_DIR
+     Value: /var/data/indexes
+     
+     Variable 4:
+     Key: DATA_DIR
+     Value: /var/data/Clinical
+     
+     Variable 5:
+     Key: PYTHON_VERSION
+     Value: 3.11.0
+     
+☐ 10. Add Persistent Disk:
+      Scroll to "Disks" section
+      Click "Add Disk"
+      
+      Name: clinical-data
+      Mount Path: /var/data
+      Size: 3 GB (for PDFs + indexes)
+      
+☐ 11. Click "Create Web Service"
+
+☐ 12. Wait for initial deployment (5 min)
+      Backend will start (without indexes yet - that's OK!)
+      
+☐ 13. SAVE YOUR BACKEND URL:
+      Example: https://clinical-ai-backend.onrender.com
+      ⚠️ YOU'LL NEED THIS FOR FRONTEND!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 2: Upload Data & Run Ingestion (25 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 14. Access Shell:
+      In your backend service dashboard
+      Click "Shell" tab (top navigation)
+      Wait for shell to connect (green status)
+      
+☐ 15. Create directory structure:
+      
+      mkdir -p /var/data/Clinical
+      cd /var/data/Clinical
+      
+☐ 16. Upload Clinical Data:
+      
+      You need to upload from your local machine:
+      /Users/spartan/Documents/Data Mining/Advanced Data Mining/clinical-ai-assistant/backend/data/Clinical/
+      
+      TWO OPTIONS:
+      
+      OPTION A - Shell Upload (Easier):
+      - Look for "Upload" button in Shell interface
+      - Upload each folder:
+        * Covid/ (folder with PDFs)
+        * ctg-studies_covid.csv
+        * Diabetes/ (folder with PDFs)
+        * ctg-studies_diabetes.csv
+        * Heart_attack/ (folder with PDFs)
+        * ctg-studies_Hearattack.csv
+        * KneeInjuries/ (folder with PDFs)
+        * ctg-studies_KneeInjuries.csv
+      
+      OPTION B - SCP (if Shell upload unavailable):
+      From your LOCAL terminal:
+      
+      # Get SSH command from Render Shell tab
+      scp -r "/Users/spartan/Documents/Data Mining/Advanced Data Mining/clinical-ai-assistant/backend/data/Clinical/" \
+        [your-render-ssh]:/var/data/
+      
+☐ 17. Verify data uploaded:
+      
+      ls -R /var/data/Clinical/
+      
+      Should show:
+      - Covid/ (with PDFs)
+      - Diabetes/ (with PDFs)
+      - Heart_attack/ (with PDFs)
+      - KneeInjuries/ (with PDFs)
+      - 4 CSV files
+      
+☐ 18. Run data ingestion:
+      
+      cd /opt/render/project/src
+      python data_ingestion.py
+      
+      ⏳ This will take 15-25 minutes
+      You'll see:
+      - Processing PDFs with Landing AI
+      - Creating FAISS indexes
+      - Saving to /var/data/indexes/
+      
+      ☕ Grab coffee, this takes a while!
+      
+☐ 19. Verify ingestion complete:
+      
+      ls -lh /var/data/indexes/
+      
+      Should show 9 files:
+      ✓ covid_index.faiss
+      ✓ covid_metadata.pkl
+      ✓ diabetes_index.faiss
+      ✓ diabetes_metadata.pkl
+      ✓ heart_attack_index.faiss
+      ✓ heart_attack_metadata.pkl
+      ✓ knee_injuries_index.faiss
+      ✓ knee_injuries_metadata.pkl
+      ✓ all_documents.pkl
+      
+☐ 20. Restart backend service:
+      
+      Go back to dashboard
+      Click "Manual Deploy" → "Deploy latest commit"
+      Wait 2-3 minutes
+      
+☐ 21. Test backend:
+      
+      Visit: https://your-backend.onrender.com/health
+      
+      Should show:
+      {
+        "status": "healthy",
+        "indexes": {
+          "covid": {"loaded": true, "num_vectors": 5106},
+          "diabetes": {"loaded": true, "num_vectors": 23313},
+          "heart_attack": {"loaded": true, "num_vectors": 3999},
+          "knee_injuries": {"loaded": true, "num_vectors": 1669}
+        }
+      }
+      
+      ✅ BACKEND IS READY!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 3: Deploy Frontend (5 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 22. Create new service:
+      Click "New +" → "Web Service"
+      Select: Clinical-Assistant-RAG
+      Click "Connect"
+      
+☐ 23. Configure Frontend:
+      Name: clinical-ai-frontend
+      Region: Same as backend (Oregon)
+      Branch: main
+      Root Directory: frontend
+      
+☐ 24. Runtime Settings:
+      Environment: Node
+      Build Command: npm install && npm run build
+      Start Command: npm start
+      
+☐ 25. Instance Type:
+      Free ✅ (frontend is lightweight)
+      
+☐ 26. Add Environment Variable:
+      Key: NEXT_PUBLIC_API_URL
+      Value: [YOUR BACKEND URL FROM STEP 13]
+      Example: https://clinical-ai-backend.onrender.com
+      
+☐ 27. Click "Create Web Service"
+☐ 28. Wait for deployment (3-5 min)
+☐ 29. GET YOUR LIVE URL! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 4: Test Your Live App (2 min)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 30. Visit your frontend URL
+☐ 31. Select "Heart Attack" domain
+☐ 32. Ask: "What are the symptoms of a heart attack?"
+☐ 33. Wait 10-15 seconds
+☐ 34. Verify you get AI response with sources!
+
+✅ YOU'RE LIVE! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔑 YOUR CREDENTIALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OpenRouter API Key:
+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
+
+Landing AI API Key (NEW):
+ZDc1MmZ4d2k3dmZkNXk3NzYxOTEyOng2WXJQVlMzT3cyRGh3WnpRbTF1ekV0MWR3eEE3RXc3
+
+GitHub Repository:
+https://github.com/ArshanBhanage/Clinical-Assistant-RAG
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 COST BREAKDOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backend (Starter): $7/month
+  - Includes 3GB persistent disk
+  - Always-on (no sleeping)
+  - Enough resources for ingestion
+
+Frontend (Free): $0/month
+
+Total: $7/month 💵
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 FILES READY IN GITHUB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ backend/deploy-render.sh (deployment script with auto-ingestion)
+✅ render.yaml (Render configuration)
+✅ backend/data_ingestion.py (Landing AI ingestion)
+✅ All Python & frontend code
+
+Just need to commit and push!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ HOW AUTO-INGESTION WORKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. First Deploy:
+   - Backend starts
+   - deploy-render.sh checks for indexes
+   - No indexes found → waits for data
+   - You upload data via Shell
+   - You run: python data_ingestion.py
+   - Indexes created in /var/data/indexes/
+   - Restart backend → indexes loaded! ✅
+
+2. Subsequent Deploys:
+   - Backend starts
+   - deploy-render.sh checks for indexes
+   - Indexes found in /var/data/indexes/ ✅
+   - Skips ingestion → starts immediately!
+   - Disk is persistent → indexes survive restarts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚨 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Problem: "data_ingestion.py fails"
+Solution: 
+  - Check Landing AI API key is correct
+  - Verify data files are in /var/data/Clinical/
+  - Check logs: tail -f ingestion.log
+
+Problem: "Out of disk space"
+Solution:
+  - Increase disk size to 5GB in Render settings
+  - Or clean up: rm -rf /var/data/Clinical/ (after ingestion)
+
+Problem: "Ingestion too slow"
+Solution:
+  - Normal - Landing AI processes 34,000+ docs
+  - Takes 15-25 minutes
+  - Can't speed up (API rate limited)
+
+Problem: "Backend shows 'No indexes found'"
+Solution:
+  - Check: ls /var/data/indexes/
+  - If empty, re-run: python data_ingestion.py
+  - If files exist, check INDEX_DIR env var
+
+Problem: "Frontend can't connect"
+Solution:
+  - Verify NEXT_PUBLIC_API_URL is correct
+  - Must include https://
+  - No trailing slash
+  - Redeploy frontend after fixing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏱️ TIMELINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+00:00 - Start backend deployment
+00:05 - Backend live (no indexes yet)
+00:10 - Start uploading data via Shell
+00:15 - Data upload complete
+00:15 - Start ingestion: python data_ingestion.py
+00:35 - Ingestion complete (20 min)
+00:37 - Restart backend
+00:40 - Backend fully operational ✅
+00:40 - Start frontend deployment
+00:45 - Frontend live ✅
+00:47 - Test app ✅
+
+TOTAL: ~45 minutes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ ADVANTAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ No need to commit large index files
+✅ Fresh indexes from latest data
+✅ Persistent disk → indexes survive restarts
+✅ Easy to re-ingest if needed
+✅ Always-on backend ($7 plan, no sleeping)
+✅ Auto-deploys on git push (code only)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 READY TO START?
+
+First, commit and push the new files:
+
+cd "/Users/spartan/Documents/Data Mining/Advanced Data Mining/clinical-ai-assistant"
+git add backend/deploy-render.sh render.yaml
+git commit -m "Add Render deployment with auto-ingestion"
+git push origin main
+
+Then go to: https://render.com 🚀
+
+═══════════════════════════════════════════════════════════════
