@@ -11,9 +11,14 @@ VISION_AGENT_API_KEY = os.getenv("VISION_AGENT_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.1-8b-instruct:free")
 
-# Paths
-DATA_DIR = "data"
-INDEX_DIR = "indexes"
+# Paths - Support both local and deployment environments
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.getenv("DATA_DIR", os.path.join(BASE_DIR, "data"))
+INDEX_DIR = os.getenv("INDEX_DIR", os.path.join(BASE_DIR, "indexes"))
+
+# For deployment: Check if /app/indexes exists (common deployment path)
+if os.path.exists("/app/indexes") and not os.path.exists(INDEX_DIR):
+    INDEX_DIR = "/app/indexes"
 
 # Clinical domains - Using Clinical folder structure
 DOMAINS = {
