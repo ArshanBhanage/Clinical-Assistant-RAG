@@ -47,12 +47,12 @@ export default function Home() {
 
   const getDomainColor = (domainId: string) => {
     const colors: { [key: string]: string } = {
-      covid: 'from-purple-500 to-purple-700',
-      diabetes: 'from-blue-500 to-blue-700',
-      heart_attack: 'from-red-500 to-red-700',
-      knee_injuries: 'from-green-500 to-green-700',
+      covid: 'border-[#FF6B6B] bg-[#FF6B6B]/10',
+      diabetes: 'border-[#FFD56B] bg-[#FFD56B]/10',
+      heart_attack: 'border-[#FF6B6B] bg-[#FF6B6B]/10',
+      knee_injuries: 'border-[#FFD56B] bg-[#FFD56B]/10',
     }
-    return colors[domainId] || 'from-gray-500 to-gray-700'
+    return colors[domainId] || 'border-gray-600 bg-gray-800/50'
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,44 +123,43 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
+    <main className="min-h-screen bg-[#1a1a1a] p-4 md:p-8" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
+        {/* Retro Header */}
+        <div className="text-center mb-8 md:mb-12 px-2">
           <div className="inline-block mb-4">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
-              Powered by Landing AI • RAG Pipeline • FAISS Vector Search
+            <div className="border-4 border-[#FF6B6B] bg-[#FF6B6B]/5 px-6 py-2 transform -skew-x-3 shadow-[8px_8px_0px_0px_rgba(255,107,107,0.3)]">
+              <span className="text-[#FFD56B] font-bold text-sm tracking-widest">EST. 2025</span>
             </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 text-[#FF6B6B] tracking-tight" style={{ fontFamily: 'Georgia, serif', textShadow: '4px 4px 0px rgba(255,107,107,0.3)' }}>
             Clinical AI Assistant
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            Ask evidence-based questions about COVID-19, Diabetes, Heart Disease, and Knee Injuries
+          <div className="w-32 h-1 bg-[#FFD56B] mx-auto mb-4"></div>
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto px-4 leading-relaxed">
+            Evidence-based medical research at your fingertips
           </p>
-          <p className="text-sm text-gray-500 mt-3 font-medium">
-            🔒 100% Grounded in Local Research Papers • No Internet Data • Fully Cited Responses
-          </p>
+          <p className="text-sm text-gray-500 mt-2">COVID-19 • Diabetes • Heart Disease • Knee Injuries</p>
         </div>
 
         {/* Query Form */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 mb-8 border-2 border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-[#2a2a2a] border-4 border-[#FF6B6B] p-4 sm:p-6 md:p-10 mb-8 shadow-[12px_12px_0px_0px_rgba(255,107,107,0.3)] transform hover:shadow-[16px_16px_0px_0px_rgba(255,107,107,0.3)] transition-all duration-300">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {/* Domain Selection */}
             <div>
-              <label className="block text-base font-bold text-gray-800 mb-3">
-                🏥 Select Clinical Domain
+              <label className="block text-sm sm:text-base font-bold text-[#FFD56B] mb-3 md:mb-4 tracking-wide uppercase" style={{ fontFamily: 'Georgia, serif' }}>
+                ◆ Select Clinical Domain
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
                 {domains.map((d) => (
                   <button
                     key={d.id}
                     type="button"
                     onClick={() => setDomain(d.id)}
-                    className={`py-3 px-4 rounded-xl font-semibold transition-all duration-200 border-2 ${
+                    className={`py-2 sm:py-3 px-2 sm:px-4 border-2 text-xs sm:text-sm font-bold transition-all duration-200 truncate transform hover:translate-x-1 hover:translate-y-1 ${
                       domain === d.id
-                        ? `bg-gradient-to-r ${getDomainColor(d.id)} text-white border-transparent shadow-xl transform scale-105`
-                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-400 hover:bg-gray-100'
+                        ? `${getDomainColor(d.id)} text-[#FFD56B] shadow-[4px_4px_0px_0px_rgba(255,213,107,0.5)]`
+                        : 'bg-[#1a1a1a] text-gray-400 border-gray-600 hover:border-[#FFD56B] hover:text-[#FFD56B]'
                     }`}
                   >
                     {d.name}
@@ -171,15 +170,16 @@ export default function Home() {
 
             {/* Query Input */}
             <div>
-              <label className="block text-base font-bold text-gray-800 mb-3">
-                💬 Your Question
+              <label className="block text-sm sm:text-base font-bold text-[#FFD56B] mb-3 md:mb-4 tracking-wide uppercase" style={{ fontFamily: 'Georgia, serif' }}>
+                ◆ Your Medical Question
               </label>
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g., What are the symptoms of COVID-19? How is diabetes managed with AI? What ML models predict heart attacks?"
-                rows={5}
-                className="w-full px-5 py-4 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all resize-none text-gray-800 placeholder-gray-400 text-base"
+                placeholder="e.g., What are the symptoms of COVID-19? How is diabetes managed with AI?"
+                rows={4}
+                className="w-full px-3 sm:px-5 py-3 sm:py-4 border-3 border-[#FF6B6B] bg-[#1a1a1a] focus:border-[#FFD56B] focus:shadow-[0_0_20px_rgba(255,213,107,0.3)] transition-all resize-none text-gray-200 placeholder-gray-600 text-sm sm:text-base font-mono"
+                style={{ outline: 'none' }}
               />
             </div>
 
@@ -187,19 +187,20 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold text-lg py-5 px-8 rounded-2xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-[#FF6B6B] text-[#1a1a1a] font-bold text-base sm:text-lg py-4 sm:py-5 px-6 sm:px-8 border-4 border-[#FF6B6B] hover:bg-[#FFD56B] hover:border-[#FFD56B] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:translate-x-2 hover:translate-y-2 shadow-[8px_8px_0px_0px_rgba(255,213,107,0.5)] hover:shadow-none uppercase tracking-wider"
+              style={{ fontFamily: 'Georgia, serif' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin h-6 w-6 mr-3" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Analyzing Research Papers...
+                  <span className="text-sm sm:text-base">Analyzing Research...</span>
                 </span>
               ) : (
                 <span className="flex items-center justify-center">
-                  <span className="text-2xl mr-2">🔍</span>
+                  <span className="text-xl sm:text-2xl mr-2">◆</span>
                   Submit Query
                 </span>
               )}
@@ -209,104 +210,106 @@ export default function Home() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-5 mb-8 shadow-lg">
-            <div className="flex items-center">
-              <span className="text-3xl mr-3">⚠️</span>
-              <p className="text-red-800 font-semibold text-lg">{error}</p>
+          <div className="bg-[#2a2a2a] border-4 border-[#FF6B6B] p-4 md:p-5 mb-8 shadow-[8px_8px_0px_0px_rgba(255,107,107,0.5)]">
+            <div className="flex items-start sm:items-center">
+              <span className="text-2xl sm:text-3xl mr-2 sm:mr-3 flex-shrink-0 text-[#FF6B6B]">◆</span>
+              <p className="text-[#FF6B6B] font-bold text-sm sm:text-base md:text-lg break-words">{error}</p>
             </div>
           </div>
         )}
 
         {/* Response Display */}
         {response && (
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             {/* Main Response */}
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 border-2 border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-extrabold text-gray-900 flex items-center">
-                  <span className="text-4xl mr-3">💡</span>
+            <div className="bg-[#2a2a2a] border-4 border-[#FFD56B] p-4 sm:p-6 md:p-10 shadow-[12px_12px_0px_0px_rgba(255,213,107,0.3)]">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 md:mb-6 gap-3">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FFD56B] flex items-center" style={{ fontFamily: 'Georgia, serif' }}>
+                  <span className="text-2xl sm:text-3xl md:text-4xl mr-2 md:mr-3">◆</span>
                   AI Response
                 </h2>
-                <span className={`px-5 py-2.5 rounded-full text-sm font-bold border-2 ${
-                  response.confidence === 'high' ? 'bg-green-100 text-green-800 border-green-400' :
-                  response.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-400' :
-                  'bg-red-100 text-red-800 border-red-400'
+                <span className={`px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 text-xs sm:text-sm font-bold border-3 self-start sm:self-auto uppercase tracking-wider ${
+                  response.confidence === 'high' ? 'bg-[#FFD56B]/20 text-[#FFD56B] border-[#FFD56B]' :
+                  response.confidence === 'medium' ? 'bg-[#FF6B6B]/20 text-[#FF6B6B] border-[#FF6B6B]' :
+                  'bg-gray-700/50 text-gray-400 border-gray-600'
                 }`}>
-                  {response.confidence.toUpperCase()} CONFIDENCE
+                  {response.confidence} CONFIDENCE
                 </span>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 mb-6 border-2 border-blue-100">
-                <p className="text-gray-900 text-lg leading-relaxed whitespace-pre-wrap font-medium">
+              <div className="bg-[#1a1a1a] border-2 border-[#FF6B6B]/30 p-4 sm:p-5 md:p-6 mb-4 md:mb-6">
+                <p className="text-gray-200 text-sm sm:text-base md:text-lg leading-relaxed whitespace-pre-wrap break-words">
                   {response.response}
                 </p>
               </div>
 
               {/* Feedback Buttons */}
-              <div className="flex items-center gap-4 pb-6 mb-6 border-b-2 border-gray-200">
-                <span className="text-base font-bold text-gray-700">Was this helpful?</span>
-                <button
-                  onClick={() => handleFeedback('up')}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold"
-                >
-                  <span className="text-xl">👍</span>
-                  <span>Yes</span>
-                </button>
-                <button
-                  onClick={() => handleFeedback('down')}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold"
-                >
-                  <span className="text-xl">👎</span>
-                  <span>No</span>
-                </button>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pb-4 md:pb-6 mb-4 md:mb-6 border-b-2 border-[#FF6B6B]/30">
+                <span className="text-sm sm:text-base font-bold text-gray-400 uppercase tracking-wide">Feedback:</span>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleFeedback('up')}
+                    className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-[#FFD56B] text-[#1a1a1a] border-2 border-[#FFD56B] hover:bg-transparent hover:text-[#FFD56B] transition-all transform hover:translate-x-1 hover:translate-y-1 shadow-[4px_4px_0px_0px_rgba(255,213,107,0.5)] hover:shadow-none font-bold text-sm"
+                  >
+                    <span className="text-lg sm:text-xl">↑</span>
+                    <span>Helpful</span>
+                  </button>
+                  <button
+                    onClick={() => handleFeedback('down')}
+                    className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-[#FF6B6B] text-[#1a1a1a] border-2 border-[#FF6B6B] hover:bg-transparent hover:text-[#FF6B6B] transition-all transform hover:translate-x-1 hover:translate-y-1 shadow-[4px_4px_0px_0px_rgba(255,107,107,0.5)] hover:shadow-none font-bold text-sm"
+                  >
+                    <span className="text-lg sm:text-xl">↓</span>
+                    <span>Not Helpful</span>
+                  </button>
+                </div>
               </div>
 
               {/* Evidence Section - Top 5 Documents */}
               {response.sources.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-extrabold text-gray-900 mb-5 flex items-center">
-                    <span className="text-3xl mr-3">📚</span>
-                    Evidence from Research Papers (Top {Math.min(5, response.sources.length)})
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#FFD56B] mb-4 md:mb-5 flex items-center uppercase tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
+                    <span className="text-2xl sm:text-3xl mr-2 md:mr-3">◆</span>
+                    <span className="break-words">Evidence Sources (Top {Math.min(5, response.sources.length)})</span>
                   </h3>
-                  <div className="space-y-5">
+                  <div className="space-y-4 md:space-y-5">
                     {response.sources.slice(0, 5).map((source, idx) => (
                       <div
                         key={idx}
-                        className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border-l-4 border-blue-600 hover:shadow-xl transition-all duration-300"
+                        className="bg-[#1a1a1a] border-3 border-[#FF6B6B]/50 p-4 sm:p-5 md:p-6 hover:border-[#FF6B6B] transition-all duration-300 transform hover:translate-x-2"
                       >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-start gap-3 flex-1">
-                            <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-extrabold px-3 py-1.5 rounded-full shadow-md">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 md:mb-4 gap-3">
+                          <div className="flex items-start gap-2 md:gap-3 flex-1 min-w-0">
+                            <span className="bg-[#FF6B6B] text-[#1a1a1a] text-xs sm:text-sm font-extrabold px-2 sm:px-3 py-1 sm:py-1.5 flex-shrink-0 border-2 border-[#FF6B6B]">
                               #{idx + 1}
                             </span>
-                            <div className="flex-1">
-                              <h4 className="font-bold text-gray-900 text-base mb-1.5 leading-snug">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-gray-200 text-sm sm:text-base mb-1.5 leading-snug break-words">
                                 {source.source}
                               </h4>
-                              <div className="flex items-center gap-3 text-xs text-gray-600">
-                                <span className="bg-white px-2.5 py-1 rounded-full font-semibold">
-                                  📄 Page {source.page}
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                <span className="bg-[#2a2a2a] border border-[#FFD56B]/30 px-2 sm:px-2.5 py-0.5 sm:py-1 font-semibold whitespace-nowrap">
+                                  ◆ Page {source.page}
                                 </span>
-                                <span className="bg-white px-2.5 py-1 rounded-full font-semibold">
+                                <span className="bg-[#2a2a2a] border border-[#FFD56B]/30 px-2 sm:px-2.5 py-0.5 sm:py-1 font-semibold truncate max-w-[150px]">
                                   {source.chunk_type}
                                 </span>
                               </div>
                             </div>
                           </div>
-                          <div className="ml-3">
-                            <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap">
-                              {(source.similarity * 100).toFixed(1)}% match
+                          <div className="self-start sm:ml-3">
+                            <span className="bg-[#FFD56B] text-[#1a1a1a] text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 border-2 border-[#FFD56B] whitespace-nowrap inline-block">
+                              {(source.similarity * 100).toFixed(1)}% MATCH
                             </span>
                           </div>
                         </div>
                         
                         {source.text && (
-                          <div className="mt-4 pl-5 border-l-3 border-blue-400">
-                            <p className="text-sm font-semibold text-blue-900 mb-2">
-                              📖 Excerpt from Document:
+                          <div className="mt-3 md:mt-4 pl-3 sm:pl-4 md:pl-5 border-l-2 border-[#FFD56B]">
+                            <p className="text-xs sm:text-sm font-bold text-[#FFD56B] mb-2 uppercase tracking-wide">
+                              Excerpt:
                             </p>
-                            <div className="bg-white rounded-xl p-4 shadow-inner">
-                              <p className="text-gray-800 text-sm leading-relaxed italic">
+                            <div className="bg-[#2a2a2a] border border-[#FF6B6B]/30 p-3 md:p-4">
+                              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed break-words font-mono">
                                 "{source.text}"
                               </p>
                             </div>
@@ -318,9 +321,9 @@ export default function Home() {
 
                   {/* All Sources Summary */}
                   {response.sources.length > 5 && (
-                    <div className="mt-6 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
-                      <p className="text-sm text-gray-600 font-medium text-center">
-                        + {response.sources.length - 5} additional sources used in analysis
+                    <div className="mt-4 md:mt-6 p-3 md:p-4 bg-[#2a2a2a] border-2 border-[#FFD56B]/30">
+                      <p className="text-xs sm:text-sm text-gray-400 font-bold text-center uppercase tracking-wide">
+                        + {response.sources.length - 5} additional sources referenced
                       </p>
                     </div>
                   )}
@@ -329,20 +332,21 @@ export default function Home() {
             </div>
 
             {/* Graph Generation */}
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 border-2 border-gray-100">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-6 flex items-center">
-                <span className="text-4xl mr-3">📊</span>
+            <div className="bg-[#2a2a2a] border-4 border-[#FF6B6B] p-4 sm:p-6 md:p-10 shadow-[12px_12px_0px_0px_rgba(255,107,107,0.3)]">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6B6B] mb-4 md:mb-6 flex items-center uppercase tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
+                <span className="text-2xl sm:text-3xl md:text-4xl mr-2 md:mr-3">◆</span>
                 Data Visualizations
               </h2>
               
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-4 md:mb-6">
                 <select
                   value={graphType}
                   onChange={(e) => setGraphType(e.target.value)}
-                  className="flex-1 px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 text-base font-semibold"
+                  className="flex-1 px-3 sm:px-4 md:px-5 py-3 md:py-4 border-3 border-[#FFD56B] bg-[#1a1a1a] text-gray-200 focus:border-[#FF6B6B] focus:shadow-[0_0_20px_rgba(255,107,107,0.3)] text-sm sm:text-base font-bold"
+                  style={{ outline: 'none' }}
                 >
                   {graphTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
+                    <option key={type.id} value={type.id} className="bg-[#1a1a1a]">
                       {type.name}
                     </option>
                   ))}
@@ -351,24 +355,25 @@ export default function Home() {
                 <button
                   onClick={handleGenerateGraph}
                   disabled={loadingGraph}
-                  className="px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl hover:shadow-2xl disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-6 sm:px-8 md:px-10 py-3 md:py-4 bg-[#FFD56B] text-[#1a1a1a] border-4 border-[#FFD56B] hover:bg-[#FF6B6B] hover:border-[#FF6B6B] disabled:opacity-50 transition-all duration-300 transform hover:translate-x-2 hover:translate-y-2 shadow-[8px_8px_0px_0px_rgba(255,107,107,0.5)] hover:shadow-none font-bold text-sm sm:text-base md:text-lg whitespace-nowrap uppercase tracking-wider"
+                  style={{ fontFamily: 'Georgia, serif' }}
                 >
                   {loadingGraph ? (
                     <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
                       Generating...
                     </span>
                   ) : (
-                    '📈 Generate Graph'
+                    '◆ Generate Graph'
                   )}
                 </button>
               </div>
 
               {graphImage && (
-                <div className="border-4 border-gray-200 rounded-2xl overflow-hidden shadow-xl">
+                <div className="border-4 border-[#FFD56B] overflow-hidden shadow-[8px_8px_0px_0px_rgba(255,213,107,0.3)]">
                   <img
                     src={graphImage}
                     alt="Generated visualization"
@@ -381,16 +386,20 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <div className="text-center mt-12 space-y-2">
-          <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border-2 border-gray-200">
-            <span className="text-2xl">🔒</span>
-            <p className="text-sm font-bold text-gray-700">
-              100% Private • All Data Processed Locally • No Internet Access
+        <div className="text-center mt-12 md:mt-16 px-4">
+          <div className="inline-block border-t-2 border-b-2 border-[#FF6B6B] py-4 px-8">
+            <p className="text-xs sm:text-sm text-gray-500 font-bold uppercase tracking-widest" style={{ fontFamily: 'Georgia, serif' }}>
+              ◆ Clinical AI Assistant ◆
+            </p>
+            <p className="text-xs text-gray-600 mt-1">
+              Powered by RAG • FAISS • OpenRouter
             </p>
           </div>
-          <p className="text-sm text-gray-500 font-medium">
-            Built with Landing AI ADE • FAISS Vector DB • OpenRouter LLM • Next.js 14
-          </p>
+          <div className="mt-6 flex justify-center gap-4">
+            <div className="w-16 h-1 bg-[#FF6B6B]"></div>
+            <div className="w-16 h-1 bg-[#FFD56B]"></div>
+            <div className="w-16 h-1 bg-[#FF6B6B]"></div>
+          </div>
         </div>
       </div>
     </main>
