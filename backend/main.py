@@ -6,10 +6,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import os
+import logging
+from datetime import datetime
 
 from rag_pipeline import RAGPipeline
 from visualizer import Visualizer
 from config import DOMAINS
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('api.log')
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
 # Initialize FastAPI app
@@ -110,12 +123,21 @@ async def query(request: QueryRequest):
     Returns:
         QueryResponse with answer, sources, and confidence
     """
+    start_time = datetime.now()
+    
     try:
+        # Log incoming request
+        logger.info(f"📥 New query received:")
+        logger.info(f"   Query: {request.query[:100]}...")
+        logger.info(f"   Domain: {request.domain or 'All domains'}")
+        
         if not request.query.strip():
+            logger.warning(f"❌ Empty query rejected")
             raise HTTPException(status_code=400, detail="Query cannot be empty")
         
         # Check if indexes are loaded
         if not rag_pipeline.indexes:
+            logger.error(f"❌ RAG pipeline not initialized")
             raise HTTPException(
                 status_code=503,
                 detail="RAG pipeline not initialized. Please build indexes first."
@@ -123,16 +145,27 @@ async def query(request: QueryRequest):
         
         # Validate domain if provided
         if request.domain and request.domain not in DOMAINS:
+            logger.warning(f"❌ Invalid domain: {request.domain}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid domain. Valid domains: {list(DOMAINS.keys())}"
             )
         
         # Retrieve relevant documents
+        logger.info(f"🔍 Retrieving documents...")
         retrieved_docs = rag_pipeline.retrieve(request.query, request.domain)
+        logger.info(f"   Found {len(retrieved_docs)} relevant documents")
         
-        # Generate response
+        # Generate response (OpenRouter call happens here - logged in rag_pipeline.py)
+        logger.info(f"💬 Generating response...")
         result = rag_pipeline.generate_response(request.query, retrieved_docs)
+        
+        # Log completion
+        elapsed = (datetime.now() - start_time).total_seconds()
+        logger.info(f"✅ Query completed:")
+        logger.info(f"   Total time: {elapsed:.2f}s")
+        logger.info(f"   Confidence: {result['confidence']}")
+        logger.info(f"   Sources: {len(result['sources'])}")
         
         # Return complete response
         return QueryResponse(
@@ -145,6 +178,9 @@ async def query(request: QueryRequest):
     except HTTPException:
         raise
     except Exception as e:
+        elapsed = (datetime.now() - start_time).total_seconds()
+        logger.error(f"❌ Query failed after {elapsed:.2f}s: {str(e)}")
+        logger.exception("Full traceback:")
         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
 
 

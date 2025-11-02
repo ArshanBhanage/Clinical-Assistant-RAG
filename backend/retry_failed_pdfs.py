@@ -8,18 +8,24 @@ from data_ingestion import DataIngestion, LandingAIADE
 from config import VISION_AGENT_API_KEY, DOMAINS
 
 # PDFs that failed in the previous run
+# FAILED_PDFS = {
+#     "covid": ["COVID_Detection_using_Deep_Learning.pdf"],
+#     "diabetes": [
+#         "Artificial_Intelligence_and_Machine_Learning_for_Improving_Glycemic_Control_in_Diabetes_Best_Practices_Pitfalls_and_Opportunities.pdf",
+#         "Knowledge-Infused_LLM-Powered_Conversational_Health_Agent_A_Case_Study_for_Diabetes_Patients.pdf",
+#         "Improving_Self-Management_of_Type_2_Diabetes_Evaluating_the_Effectiveness_of_a_Mobile_App-Based_Patient_Education_Approach.pdf",
+#         "Deep_Learning-Based_Genetic_Detection_and_Pathogenesis_of_Diabetes.pdf"
+#     ],
+#     "heart_attack": [
+#         "Machine_Learning_Approaches_for_Predicting_Heart_Attacks.pdf",
+#         "Machine_Learning_Model_for_Heart_Disease_Detection_A_Comparative_Analysis_of_SVM_vs_KNN.pdf"
+#     ]
+# }
+
 FAILED_PDFS = {
-    "covid": ["COVID_Detection_using_Deep_Learning.pdf"],
-    "diabetes": [
-        "Artificial_Intelligence_and_Machine_Learning_for_Improving_Glycemic_Control_in_Diabetes_Best_Practices_Pitfalls_and_Opportunities.pdf",
-        "Knowledge-Infused_LLM-Powered_Conversational_Health_Agent_A_Case_Study_for_Diabetes_Patients.pdf",
-        "Improving_Self-Management_of_Type_2_Diabetes_Evaluating_the_Effectiveness_of_a_Mobile_App-Based_Patient_Education_Approach.pdf",
-        "Deep_Learning-Based_Genetic_Detection_and_Pathogenesis_of_Diabetes.pdf"
-    ],
-    "heart_attack": [
-        "Machine_Learning_Approaches_for_Predicting_Heart_Attacks.pdf",
-        "Machine_Learning_Model_for_Heart_Disease_Detection_A_Comparative_Analysis_of_SVM_vs_KNN.pdf"
-    ]
+    "covid": ["Extraction_of_Features_from_Lung_Image_for_the_Detection_of_Covid-19.pdf"],
+    "diabetes": ["Deep_Learning-Based_Genetic_Detection_and_Pathogenesis_of_Diabetes.pdf"],
+    "heart_attack": ["IOT_Based_Heart_Rate_Monitoring_System_Design_for_Heart_Attack_Detection.pdf"]
 }
 
 def retry_failed_pdfs():

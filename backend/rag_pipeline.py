@@ -8,6 +8,8 @@ import faiss
 from typing import List, Dict, Any, Optional
 from sentence_transformers import SentenceTransformer
 import requests
+import logging
+from datetime import datetime
 
 from config import (
     EMBEDDING_MODEL, 
@@ -18,6 +20,13 @@ from config import (
     OPENROUTER_MODEL,
     DOMAINS
 )
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 class RAGPipeline:
@@ -233,15 +242,44 @@ Answer (cite sources and be concise):"""
                 "max_tokens": 1000
             }
             
+            # Log OpenRouter request
+            logger.info(f"🚀 OpenRouter API Call:")
+            logger.info(f"   Model: {OPENROUTER_MODEL}")
+            logger.info(f"   Query: {query[:100]}...")
+            logger.info(f"   Context docs: {len(retrieved_docs)}")
+            logger.info(f"   Prompt length: {len(prompt)} chars")
+            
+            start_time = datetime.now()
+            
             response = requests.post(
                 OPENROUTER_BASE_URL,
                 headers=headers,
-                json=payload
+                json=payload,
+                timeout=30
             )
+            
+            elapsed = (datetime.now() - start_time).total_seconds()
             
             if response.status_code == 200:
                 result = response.json()
                 answer = result["choices"][0]["message"]["content"]
+                
+                # Log successful response
+                logger.info(f"✅ OpenRouter Response:")
+                logger.info(f"   Status: 200 OK")
+                logger.info(f"   Response time: {elapsed:.2f}s")
+                logger.info(f"   Response length: {len(answer)} chars")
+                
+                # Log usage if available
+                if "usage" in result:
+                    usage = result["usage"]
+                    logger.info(f"   Token usage: {usage.get('total_tokens', 'N/A')} "
+                              f"(prompt: {usage.get('prompt_tokens', 'N/A')}, "
+                              f"completion: {usage.get('completion_tokens', 'N/A')})")
+                
+                # Log cost if available
+                if "cost" in result:
+                    logger.info(f"   Cost: ${result['cost']:.6f}")
                 
                 return {
                     "response": answer,
@@ -249,13 +287,30 @@ Answer (cite sources and be concise):"""
                     "confidence": "high" if len(retrieved_docs) >= 3 else "medium"
                 }
             else:
+                # Log error response
+                logger.error(f"❌ OpenRouter Error:")
+                logger.error(f"   Status: {response.status_code}")
+                logger.error(f"   Response time: {elapsed:.2f}s")
+                logger.error(f"   Error: {response.text[:200]}")
+                
                 return {
                     "response": f"Error generating response: {response.status_code}",
                     "sources": sources,
                     "confidence": "error"
                 }
                 
+        except requests.exceptions.Timeout:
+            logger.error(f"❌ OpenRouter Timeout:")
+            logger.error(f"   Request exceeded 30 seconds")
+            return {
+                "response": "Error: Request timed out. Please try again.",
+                "sources": sources,
+                "confidence": "error"
+            }
         except Exception as e:
+            logger.error(f"❌ OpenRouter Exception:")
+            logger.error(f"   Error: {str(e)}")
+            logger.exception("Full traceback:")
             return {
                 "response": f"Error calling LLM: {str(e)}",
                 "sources": sources,
